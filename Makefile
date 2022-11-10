@@ -9,4 +9,5 @@ vmm:
 
 clean:
 	rm -f *.out 
-	rm -f *.o		rm -f *.o	
+	rm -f *.o	
+	rm -f simulador 
