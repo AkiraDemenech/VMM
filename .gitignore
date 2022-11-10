@@ -1,3 +1,6 @@
+*.zip 
+*.log 
+
 # Prerequisites
 *.d
 
