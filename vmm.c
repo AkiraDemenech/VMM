@@ -7,6 +7,7 @@ int main (int argc, char ** argv) {
 
 	int quadros = QUADROS;
 	char algoritmo = FIFO;
+	char * backing_store = "BACKING_STORE.bin";
 	FILE * entrada = stdin;
 
 	if(argv != NULL) {
@@ -24,6 +25,20 @@ int main (int argc, char ** argv) {
 					break;
 
 					
+					case 'Q':
+						printf("quadros");
+						a = 2;
+					break;	
+
+					case 'E':
+						printf("endereços lógicos e comandos");
+						a = 1;
+					break;	
+
+					case 'B':
+						printf("backing store");
+						a = 4;
+
 				}
 				continue;
 			}
@@ -59,6 +74,12 @@ int main (int argc, char ** argv) {
 						default:
 							printf("%s (%c desconhecido)", argv[c], algoritmo);	
 					}	
+				break;
+
+				case 4:
+					backing_store = argv[c];
+					printf("\nCódigo binário do processo: %s", backing_store);
+				break;		
 			}	
 
 			a++;	
@@ -66,6 +87,16 @@ int main (int argc, char ** argv) {
 	}
 
 	
+	if(entrada == NULL) {
+		printf("\nErro ao abrir o arquivo de entrada.\n");
+		return -1;
+	} 	
+
+	FILE * bs = fopen(backing_store, "rb");
+	if(bs == NULL) {
+		printf("\nErro ao abrir o backing store.\n");
+		return -2;
+	}
 
 	return  0;
 }

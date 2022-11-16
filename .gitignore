@@ -1,5 +1,9 @@
 *.zip 
 *.log 
+*.txt
+*.bin 
+
+simulador
 
 # Prerequisites
 *.d
