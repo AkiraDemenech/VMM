@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include"fifo.h"
+#include"lru.h"
 #define QUADROS 128
 #define FIFO 'F'
 #define LRU 'L'
@@ -24,7 +26,6 @@ int main (int argc, char ** argv) {
 						a = 3;
 					break;
 
-					
 					case 'Q':
 						printf("quadros");
 						a = 2;
@@ -49,7 +50,6 @@ int main (int argc, char ** argv) {
 				case 1:
 					printf("\nArquivo de entrada: %s", argv[c]);
 					entrada = fopen(argv[c], "r");
-					
 				break;
 
 				case 2:
@@ -86,7 +86,6 @@ int main (int argc, char ** argv) {
 		}
 	}
 
-	
 	if(entrada == NULL) {
 		printf("\nErro ao abrir o arquivo de entrada.\n");
 		return -1;
