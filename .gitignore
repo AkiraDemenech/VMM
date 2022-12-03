@@ -2,6 +2,10 @@
 *.log 
 *.txt
 *.bin 
+*.pdf
+
+docs/*
+Arquivos_Livro_para_testes/*
 
 simulador
 
