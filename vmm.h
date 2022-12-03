@@ -1,0 +1,5 @@
+
+ 
+
+typedef void * MANAGER;
+
