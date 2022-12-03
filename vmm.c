@@ -7,9 +7,17 @@
 
 int main (int argc, char ** argv) {
 
+
+	// -q
 	int quadros = QUADROS;
+
+	// -a
 	char algoritmo = FIFO;
+
+	// -b
 	char * backing_store = "BACKING_STORE.bin";
+
+	// -e
 	FILE * entrada = stdin;
 
 	if(argv != NULL) {
@@ -41,6 +49,7 @@ int main (int argc, char ** argv) {
 						a = 4;
 
 				}
+				printf("\n");
 				continue;
 			}
 
@@ -48,20 +57,20 @@ int main (int argc, char ** argv) {
 
 			switch(a) {
 				case 1:
-					printf("\nArquivo de entrada: %s", argv[c]);
+					printf("Arquivo de entrada: %s", argv[c]);
 					entrada = fopen(argv[c], "r");
 				break;
 
 				case 2:
 					sscanf(argv[c], "%d", &quadros);
-					printf("\nMemória virtual: %d quadros", quadros);
+					printf("Memória virtual: %d quadros", quadros);
 				break;
 
 				case 3:
 					algoritmo = argv[c][0];
 					if(algoritmo >= 'a')
 						algoritmo += 'A' - 'a';
-					printf("\nAlgoritmo ");	
+					printf("Algoritmo ");	
 					switch(algoritmo) {
 						case FIFO:
 							printf("FIFO");
@@ -74,28 +83,35 @@ int main (int argc, char ** argv) {
 						default:
 							printf("%s (%c desconhecido)", argv[c], algoritmo);	
 					}	
+					
 				break;
 
 				case 4:
 					backing_store = argv[c];
-					printf("\nCódigo binário do processo: %s", backing_store);
+					printf("Código binário do processo: %s", backing_store);
 				break;		
 			}	
+
+			printf("\n");
 
 			a++;	
 		}
 	}
 
+	printf("\n");
+
 	if(entrada == NULL) {
-		printf("\nErro ao abrir o arquivo de entrada.\n");
+		printf("Erro ao abrir o arquivo de entrada.\n");
 		return -1;
 	} 	
 
 	FILE * bs = fopen(backing_store, "rb");
 	if(bs == NULL) {
-		printf("\nErro ao abrir o backing store.\n");
+		printf("Erro ao abrir o backing store.\n");
 		return -2;
 	}
+
+	
 
 	return  0;
 }

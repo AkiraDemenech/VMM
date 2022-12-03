@@ -19,3 +19,9 @@ clean:
 	rm -f *.out 
 	rm -f *.o	
 	rm -f simulador 
+
+clear:	
+	clear
+	make clean 
+
+	
