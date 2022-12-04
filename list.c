@@ -1,13 +1,37 @@
 
+/**
+ * @file list.c
+ * @author Guilherme Akira Demenech Mori
+ * @brief Implementação da lista duplamente encadeada 
+ * @version 0
+ * @date 2022-12-04
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+*/ 
+
 #include<stdlib.h>
 #include "list.h"
 
+/**
+ * 
+ * @struct node 
+ * @brief Nó da lista dinâmica 
+ * @details Publicamente definido como \ref LIST 
+ * 
+ */
 typedef struct node {
-	LIST next;
-	LIST prev;
-	void * value;
+	LIST next; /**< Ponteiro para o próximo nó da lista */
+	LIST prev; /**< Ponteiro para o nó anterior da lista */
+	void * value; /**< Ponteiro para o espaço alocado para armazenar dados na lista */
 	
 } list;
+/**
+ * @typedef list 
+ * @brief Tipo da lista dinâmica 
+ *  
+*/
+
 
 LIST list_node (int value_size) {
 	list * l = malloc(sizeof(list));

@@ -1,13 +1,40 @@
 
+/**
+ * @file lru.c
+ * @author Guilherme Akira Demenech Mori
+ * @brief Implementação de \ref lru.h utilizando filas \ref list.h 
+ * 
+ * @details Armazenando em listas ligadas, 
+ * forma uma fila em que acessos repetidos movem a prioridade para o final novamente 
+ * 
+ * @version 2
+ * @date 2022-12-04
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+*/
+
 #include<stdlib.h>
 #include"lru.h"
 #include"list.h"
 
+/**
+ * 
+ * @struct lru 
+ * @brief Estrutura do gerenciador LRU 
+ * @details Definida também como o tipo \ref lru_manager
+ * 
+*/
 typedef struct lru {
 	int limit;
 	LIST queue;
 	LIST last;
 } lru_manager;
+/**
+ * @brief Armazena o gerenciador LRU
+ * @typedef lru_manager 
+*/
+
 
 MANAGER new_lru (int size_limit) {
 	lru_manager * lm = malloc(sizeof(lru_manager));
