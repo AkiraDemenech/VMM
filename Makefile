@@ -31,3 +31,13 @@ clear:
 
 	
  
+doclear:
+	clear
+	make doclean
+
+doclean:
+	rm -f -r html/* latex/*	
+
+doc:	
+	doxygen docsimulador
+	echo Documentado com sucesso!
