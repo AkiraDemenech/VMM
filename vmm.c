@@ -135,7 +135,6 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 					fprintf(log, "\tPage-replacement [%d] ",r);
 					frame_number = page_table[r];
 					page_table[r] = -2;
-
 					tlb_removal(tlb_manager, r); // TLB remove
 					for(t = 0; t < tlb_size; t++)
 						if(tlb[t].page_number == r) {
@@ -144,7 +143,6 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 							break;
 						}
 				}
-					
 				fprintf(log, "\t(%d)", frame_number);
 				page_table[page_number] = frame_number;	
 				fseek(backing_store, frame_size * frame_number, SEEK_SET);				 
@@ -244,7 +242,6 @@ int main (int argc, char ** argv) {
 				continue;
 			}
 
-			
 			printf("\t");
 
 			switch(a) {
@@ -320,7 +317,6 @@ int main (int argc, char ** argv) {
 	}
 
 	MANAGER gerenciador_fisico;
-
 	MANAGER gerenciador_tlb;
 	int (* substituir)(MANAGER, int);
 	int (* remover)(MANAGER, int);
