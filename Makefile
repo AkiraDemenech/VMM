@@ -29,8 +29,6 @@ clear:
 	clear
 	make clean 
 
-	
- 
 doclear:
 	clear
 	make doclean

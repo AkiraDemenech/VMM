@@ -5,7 +5,6 @@
  */
 
  
-
 /**
  * @brief Tipo de ponteiro para o gerenciador de substituição de páginas
  * 
