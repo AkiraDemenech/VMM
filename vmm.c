@@ -113,16 +113,18 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 			if(tlb[b].page_number < 0)	
 				r = b;
 		}		
-		if(b == tlb_size) {		
+		if(b >= tlb_size) {		
 			if(r < 0) {
-				fprintf(log, "#%d\n physical replacement return = %d\n target = %d\n page = %d\n", total,r, t, page_number);
-				return -1;
+				fprintf(log, "#%d %d %d\n physical replacement return = %d\n target = %d\n page = %d\n", total,miss,fault,r, t, page_number);
+				return -4;
 			}	
 
 			b = r;
 		}	
 		r = physical_replacement(physical_manager, page_number);	
 
+	//	printf("Before = %d\n",b);
+	//	printf("%p-%p\n",&tlb[b],sizeof(tlb_slot) + (&tlb[b]) - 1);
 		if(tlb[b].page_number == page_number) // TLB hit	
 			frame_number = tlb[b].frame_number;
 		else { // TLB miss
@@ -161,6 +163,9 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 				fseek(backing_store, frame_size * page_number, SEEK_SET);				 
 				fread(physical_memory[frame_number], sizeof(char), frame_size, backing_store);	
 			} else frame_number = page_table[page_number];
+		//	printf("After = %d\n",b);
+			if(b < 0)
+				return -4;
 			tlb[b].frame_number = frame_number;
 			tlb[b].page_number = page_number;
 			fprintf(log, "\n");
@@ -239,6 +244,11 @@ int main (int argc, char ** argv) {
 						a = COD_QUADROS;//2;
 					break;	
 
+					case ARG_PAG:
+						printf("virtual memory size (pages)");
+						a = COD_PAG;
+					break;	
+
 					case ARG_LOG:
 						printf("actions log");
 						a = COD_LOG;
@@ -274,6 +284,11 @@ int main (int argc, char ** argv) {
 				case COD_QUADROS://2:
 					sscanf(argv[c], "%d", &quadros);
 					printf("Physical memory: %d frame%s", quadros, (quadros == 1) ? ("") : ("s"));
+				break;
+
+				case COD_PAG:
+					sscanf(argv[c], "%d", &paginas);
+					printf("Virtual memory: %d page%s", paginas, (paginas == 1) ? ("") : ("s"));
 				break;
 
 				case COD_TLB:
@@ -349,9 +364,20 @@ int main (int argc, char ** argv) {
 			remover = fifo_remove;
 			substituir = fifo_access;
 		break;
+
+		case LRU:
+			fprintf(log,"\tLRU\n");
+
+			gerenciador_tlb = new_lru(tlb);
+			gerenciador_fisico = new_lru(quadros);
+
+			remover = lru_remove;
+			substituir = lru_access;
+		break;
 	
 		default:
-		
+			printf("Unknown page-replacement strategy.\n");
+			return -3;
 	}
 
 

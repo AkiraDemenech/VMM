@@ -15,7 +15,7 @@ void list_del (LIST node);
 
 void *list_value (LIST node);
 
-int list_len (LIST node);
+
 
 
 

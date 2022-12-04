@@ -6,7 +6,7 @@ typedef struct node {
 	LIST next;
 	LIST prev;
 	void * value;
-	int length;
+	
 } list;
 
 LIST list_node (int value_size) {
@@ -28,9 +28,7 @@ void * list_value (LIST node) {
 	return (node == NULL) ? (0) : (((list *) node)->value);
 }
 
-int list_len (LIST node) {
-	return (node == NULL) ? (0) : (((list *) node)->length);
-}
+
 
 LIST list_get_prev (LIST this) {
 	return (this == NULL) ? (NULL) : (((list *) this)->prev);
@@ -60,23 +58,12 @@ void list_set_next (LIST this, LIST next) {
 	
 		list * l = (list *) this;
 		
-		int last_len = l->length;	
-		l->length = list_len(next) + 1;			
+					
 		l->next = next;
 
-		if(last_len != l->length) {
-			last_len = l->length;
-			while(1) {			
-				next = l;
-				l = (list*) list_get_prev(l);
 
-				if(l == NULL)
-					return;
 
-				last_len++;
-				l->length = last_len;
-			}
-		}	
+			
 	}
 
 	if(next != NULL && list_get_prev(next) != this) 
