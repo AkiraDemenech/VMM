@@ -53,8 +53,24 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 
 	int frame_size = 1 << offset; 				
 	int offset_mask = frame_size - 1;
+	int frame_mask = 1;
+	while(frame_mask < frames)
+		frame_mask <<= 1;
+	if(frame_mask > frames)	{
+		frames = frame_mask;
+		fprintf(log, "Increase physical memory to %d frame%c\n", frames, (frames == 1) ? (' ') : ('s'));
+	}	
+	frame_mask--;	
 	char physical_memory[frames][frame_size];
 	
+	int page_mask = 1;
+	while(page_mask < pages)
+		page_mask <<= 1;
+	if(page_mask > pages) {	
+		pages = page_mask;
+		fprintf(log, "Increase virtual memory to %d page%c\n", pages, (pages == 1) ? (' ') : ('s'));
+	}	
+	page_mask--;	
 	int page_table[pages];
 	tlb_slot tlb[tlb_size];
 
@@ -97,7 +113,7 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 
 		total++;
 		index = c & offset_mask; 
-		page_number = c >> offset;
+		page_number = (c >> offset) & page_mask;
 
 		r = tlb_replacement(tlb_manager, page_number);
 		t = page_number;
