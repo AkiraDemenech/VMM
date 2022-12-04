@@ -23,18 +23,27 @@ int fifo_remove (MANAGER subst_man, int address) {
 
 	LIST node = fm->queue;	
 	LIST prev = NULL;
+	LIST next;
+	int r = 0;
 
 	while(node != NULL) {
 		
+		next = list_get_next(node);
+
 		if(address == *(int *)list_value(node)) {
-			list_set_next(prev, list_get_next(node));
+			if(prev == NULL)
+				fm->queue = next;
+			list_set_next(prev, next);
+			list_del(node);
+			r++;
 		} else prev = node;					
 		
-		node = list_get_next(node);
+		
+		node = next;
 	}
 
 	
-	return -1;
+	return r;
 }
 
 int fifo_access (MANAGER subst_man, int address) {

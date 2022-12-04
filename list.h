@@ -11,9 +11,13 @@ LIST list_get_prev (LIST this);
 
 void list_set_prev (LIST this, LIST prev);
 
+void list_del (LIST node);
+
 void *list_value (LIST node);
 
 int list_len (LIST node);
+
+
 
 
 

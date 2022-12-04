@@ -17,6 +17,13 @@ LIST list_node (int value_size) {
 	return l;
 }
 
+void list_del (LIST node) {
+	if(list_value(node) != NULL)
+		free(list_value(node));
+	if(node != NULL) 
+		free(node);
+}
+
 void * list_value (LIST node) {
 	return (node == NULL) ? (0) : (((list *) node)->value);
 }

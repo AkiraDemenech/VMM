@@ -66,11 +66,11 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 		tlb[b].page_number = -1;
 
 	int page_number, frame_number, index, physical_address;	
-	int available_frame = 0, total = 0, last = 0;
+	int available_frame = 0, total = 0, last = 0, miss = 0, fault = 0;
 
-	while(!feof(accesses)) {
-		fscanf(accesses, "%d", &c);
-		total++;
+	while(fscanf(accesses, "%d", &c) == 1) {
+		
+		
 
 		if(c < 0) {
 
@@ -95,27 +95,38 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 			continue;
 		}
 
+		total++;
 		index = c & offset_mask; 
 		page_number = c >> offset;
 
 		r = tlb_replacement(tlb_manager, page_number);
 		t = page_number;
-		if(r >= 0) 
+		if(r >= 0) {
 			t = r;
+			r = -1;	
+		}			
 
-		r = physical_replacement(physical_manager, page_number);	
 
-		for(b = 0; b < tlb_size; b++) 
-			if(tlb[b].page_number == t || tlb[b].page_number < 0)
+		for(b = 0; b < tlb_size; b++) {
+			if(tlb[b].page_number == t)
 				break;
+			if(tlb[b].page_number < 0)	
+				r = b;
+		}		
 		if(b == tlb_size) {		
-			printf("r = %d\n t = %d\n p = %d\n #%d\n",r, t, page_number, total);
-			return -1;
+			if(r < 0) {
+				fprintf(log, "#%d\n physical replacement return = %d\n target = %d\n page = %d\n", total,r, t, page_number);
+				return -1;
+			}	
+
+			b = r;
 		}	
+		r = physical_replacement(physical_manager, page_number);	
 
 		if(tlb[b].page_number == page_number) // TLB hit	
 			frame_number = tlb[b].frame_number;
 		else { // TLB miss
+			
 			if(total - last > 1) {
 				fprintf(log, " \n");
 				if(total - last > 2) {
@@ -125,8 +136,10 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 				}
 			}
 			last = total;
+			miss++;
 			fprintf(log, "#%d\t[%d:\t%d.%d]\tTLB miss [%d] .%d ",total,c,page_number,index,t,b);
 			if(page_table[page_number] < 0) { // Page-fault
+				fault++;
 				fprintf(log,"\tPage-fault");
 				if(r < 0) {  
 					frame_number = available_frame;
@@ -135,18 +148,18 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 					fprintf(log, "\tPage-replacement [%d] ",r);
 					frame_number = page_table[r];
 					page_table[r] = -2;
-					tlb_removal(tlb_manager, r); // TLB remove
+					fprintf(log, "- %d", tlb_removal(tlb_manager, r)); // TLB remove
 					for(t = 0; t < tlb_size; t++)
 						if(tlb[t].page_number == r) {
 							fprintf(log, "\t .%d ", t);
 							tlb[t].page_number = -2;
-							break;
+						//	break;
 						}
 				}
 				fprintf(log, "\t(%d)", frame_number);
 				page_table[page_number] = frame_number;	
-				fseek(backing_store, frame_size * frame_number, SEEK_SET);				 
-				fread(physical_memory[frame_number], sizeof(char), frame_size, backing_store);
+				fseek(backing_store, frame_size * page_number, SEEK_SET);				 
+				fread(physical_memory[frame_number], sizeof(char), frame_size, backing_store);	
 			} else frame_number = page_table[page_number];
 			tlb[b].frame_number = frame_number;
 			tlb[b].page_number = page_number;
@@ -160,6 +173,9 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 
 		printf("Virtual address: %d Physical address: %d Value: %d\n", c, physical_address, physical_memory[frame_number][index]);
 	}
+
+	printf("\nPage-fault rate: %.03f%%\nTLB hit rate: %.03f%%\n\n", 100*fault/(float)total, 100*(1 - (miss/(float)total)));
+	fprintf(log, "\nStatistics: \n\tTLB miss: %d \n\tPage-fault: %d \n\tTotal memory accesses: %d \n", miss, fault, total);
 
 	return 0;
 }
