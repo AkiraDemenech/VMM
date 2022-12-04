@@ -21,13 +21,14 @@
 /**
  * 
  * @struct fifo 
- * @brief Estrutura do gerenciador FIFO 
+ * @brief Estrutura do gerenciador FIFO  
  * @details Definida também como o tipo \ref fifo_manager
+ * (externamente utilizada como \ref MANAGER)
  * 
 */
 typedef struct fifo {
-	int limit;
-	LIST queue;
+	int limit;	/**< @short Quantidade máxima de endereços antes de aplicar substituições */ 
+	LIST queue;	/**< @short Fila de inclusões recentes */ 
 } fifo_manager;
 /**
  * @brief Armazena o gerenciador FIFO

@@ -82,8 +82,8 @@
  *  
  */
 typedef struct buffer {
-	int page_number;
-	int frame_number;
+	int page_number;	/**< Número da página (negativo se esta posição estiver disponível) */ 
+	int frame_number;	/**< Número do quadro associado */ 
 } tlb_slot;
 /**
  * @brief Relaciona as páginas com os quadros correspondentes na TLB

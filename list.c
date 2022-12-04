@@ -23,7 +23,7 @@
 typedef struct node {
 	LIST next; /**< Ponteiro para o próximo nó da lista */
 	LIST prev; /**< Ponteiro para o nó anterior da lista */
-	void * value; /**< Ponteiro para o espaço alocado para armazenar dados na lista */
+	void * value; /**< @short Ponteiro para o espaço alocado para armazenar dados na lista */
 	
 } list;
 /**

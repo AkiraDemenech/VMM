@@ -23,12 +23,13 @@
  * @struct lru 
  * @brief Estrutura do gerenciador LRU 
  * @details Definida também como o tipo \ref lru_manager
+ * (externamente utilizada como \ref MANAGER)
  * 
 */
 typedef struct lru {
-	int limit;
-	LIST queue;
-	LIST last;
+	int limit;	/**< @short Quantidade máxima de endereços antes de aplicar substituições */
+	LIST queue;	/**< @short Fila de acessos recentes */
+	LIST last;	/**< @short Ponteiro para a posição na lista do último acesso */
 } lru_manager;
 /**
  * @brief Armazena o gerenciador LRU
