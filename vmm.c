@@ -106,7 +106,6 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 			r = -1;	
 		}			
 
-
 		for(b = 0; b < tlb_size; b++) {
 			if(tlb[b].page_number == t)
 				break;

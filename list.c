@@ -61,8 +61,6 @@ void list_set_next (LIST this, LIST next) {
 					
 		l->next = next;
 
-
-
 			
 	}
 
