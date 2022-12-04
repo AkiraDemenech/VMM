@@ -26,14 +26,14 @@ int list_len (LIST node) {
 }
 
 LIST list_get_prev (LIST this) {
-	return (node == NULL) ? (NULL) : (((list *) this)->prev);
+	return (this == NULL) ? (NULL) : (((list *) this)->prev);
 }
 
 void list_set_prev (LIST this, LIST prev) {
 	if(this != NULL) {
 		
 		list * l = (list *) this;		
-		this->prev = prev;		
+		l->prev = prev;		
 
 	}	
 
@@ -44,7 +44,7 @@ void list_set_prev (LIST this, LIST prev) {
 }
 
 LIST list_get_next (LIST this) {
-	return (node == NULL) ? (NULL) : (((list *) this)->next);
+	return (this == NULL) ? (NULL) : (((list *) this)->next);
 }
 
 void list_set_next (LIST this, LIST next) {
@@ -53,21 +53,21 @@ void list_set_next (LIST this, LIST next) {
 	
 		list * l = (list *) this;
 		
-		int last_len = this->length;	
-		this->length = list_len(next) + 1;			
-		this->next = next;
+		int last_len = l->length;	
+		l->length = list_len(next) + 1;			
+		l->next = next;
 
-		if(last_len != this->length) {
-			last_len = this->length;
+		if(last_len != l->length) {
+			last_len = l->length;
 			while(1) {			
-				next = this;
-				this = (list*) list_get_prev(this);
+				next = l;
+				l = (list*) list_get_prev(l);
 
-				if(this == NULL)
+				if(l == NULL)
 					return;
 
 				last_len++;
-				this->length = last_len;
+				l->length = last_len;
 			}
 		}	
 	}

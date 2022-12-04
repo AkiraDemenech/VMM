@@ -12,6 +12,7 @@
 #define ARG_ALGORITMO 'A'
 #define ARG_BACKING_STORE 'B'
 #define ARG_ENTRADA 'E'
+#define ARG_LOG 'L'
 
 #define COD_ENTRADA 1
 #define COD_QUADROS 2
@@ -20,6 +21,7 @@
 #define COD_DESLOCAMENTO 5
 #define COD_TLB 6
 #define COD_PAG 7
+#define COD_LOG 8
 
 #define DESLOCAMENTO 8 // bits do endereço dentro de cada quadro/página (tamanho em bytes)
 
@@ -44,10 +46,10 @@ typedef struct buffer {
 
  
 
-int simulator (FILE * accesses, FILE * backing_store, 
+int simulator (FILE * log, FILE * accesses, FILE * backing_store, 
 				int frames, int pages, int tlb_size, int offset, 
 				MANAGER physical_manager, int(*physical_replacement)(MANAGER,int),
-				MANAGER tlb_manager, int(* tlb_replacement)(MANAGER, int)) {
+				MANAGER tlb_manager, int(* tlb_replacement)(MANAGER,int), int(* tlb_removal)(MANAGER, int)) {
 
 	int frame_size = 1 << offset; 				
 	int offset_mask = frame_size - 1;
@@ -64,29 +66,30 @@ int simulator (FILE * accesses, FILE * backing_store,
 		tlb[b].page_number = -1;
 
 	int page_number, frame_number, index, physical_address;	
-	int available_frame = 0;
+	int available_frame = 0, total = 0, last = 0;
 
 	while(!feof(accesses)) {
 		fscanf(accesses, "%d", &c);
+		total++;
 
 		if(c < 0) {
 
-			printf("\n Table %d:\n", c);
+			printf("\nTable %d:\n", c);
 
 			if(c < -1) {
 				for(b = 0; b < pages; b++) 
 					if(page_table[b] < 0) { // ausente
 						if(c != -3)
-							printf("  Page number: %d Virtual address: %d \n", b, b << offset);
+							printf("  Page number: %d Virtual address: %d-%d \n", b, b << offset, (b << offset) + offset_mask);
 
-					} else if(c != 2) // presente
-						printf("  Page number: %d Virtual address: %d \n\t Frame number: %d Physical address: %d \n", b, b << offset, page_table[b], page_table[b] << offset);
+					} else if(c != -2) // presente
+						printf("  Page number: %d Virtual address: %d-%d Frame number: %d Physical address: %d-%d \n", b, b << offset, (b << offset) + offset_mask, page_table[b], page_table[b] << offset, (page_table[b] << offset) + offset_mask);
 				
-			} else for(b = 0; b < tlb_size; b++) {
-				if(tlb[b].page_number < 0)
-					break;
-				printf("  Page number: %d Virtual address: %d \n\t Frame number: %d Physical address: %d \n", tlb[b].page_number, tlb[b].page_number << offset, tlb[b].frame_number, tlb[b].frame_number << offset);
-			}
+			} else for(b = 0; b < tlb_size; b++) 
+				if(tlb[b].page_number >= 0)
+					printf("  Page number: %d Virtual address: %d-%d Frame number: %d Physical address: %d-%d \n", tlb[b].page_number, tlb[b].page_number << offset, (tlb[b].page_number << offset) + offset_mask, tlb[b].frame_number, tlb[b].frame_number << offset, (tlb[b].frame_number << offset) + offset_mask);
+					
+			
 
 			printf("\n");		
 			continue;
@@ -105,25 +108,51 @@ int simulator (FILE * accesses, FILE * backing_store,
 		for(b = 0; b < tlb_size; b++) 
 			if(tlb[b].page_number == t || tlb[b].page_number < 0)
 				break;
+		if(b == tlb_size) {		
+			printf("r = %d\n t = %d\n p = %d\n #%d\n",r, t, page_number, total);
+			return -1;
+		}	
 
 		if(tlb[b].page_number == page_number) // TLB hit	
 			frame_number = tlb[b].frame_number;
 		else { // TLB miss
+			if(total - last > 1) {
+				fprintf(log, " \n");
+				if(total - last > 2) {
+					if(total - last > 4)
+						fprintf(log,"%d hits\n", total - last - 1);
+					fprintf(log," \n");
+				}
+			}
+			last = total;
+			fprintf(log, "#%d\t[%d:\t%d.%d]\tTLB miss [%d] .%d ",total,c,page_number,index,t,b);
 			if(page_table[page_number] < 0) { // Page-fault
+				fprintf(log,"\tPage-fault");
 				if(r < 0) {  
 					frame_number = available_frame;
 					available_frame++;
-				} else { // Page-replacement
+				} else { 	 // 	Page-replacement
+					fprintf(log, "\tPage-replacement [%d] ",r);
 					frame_number = page_table[r];
 					page_table[r] = -2;
-					// TLB remove
 
+					tlb_removal(tlb_manager, r); // TLB remove
+					for(t = 0; t < tlb_size; t++)
+						if(tlb[t].page_number == r) {
+							fprintf(log, "\t .%d ", t);
+							tlb[t].page_number = -2;
+							break;
+						}
 				}
 					
-				fseek(backing_store, size * frame_number, SEEK_SET);
+				fprintf(log, "\t(%d)", frame_number);
+				page_table[page_number] = frame_number;	
+				fseek(backing_store, frame_size * frame_number, SEEK_SET);				 
+				fread(physical_memory[frame_number], sizeof(char), frame_size, backing_store);
 			} else frame_number = page_table[page_number];
 			tlb[b].frame_number = frame_number;
 			tlb[b].page_number = page_number;
+			fprintf(log, "\n");
 		}	
 			
 
@@ -138,6 +167,8 @@ int simulator (FILE * accesses, FILE * backing_store,
 }
 
 int main (int argc, char ** argv) {
+
+	printf("\nVirtual Memory Manager simulator:\tcommand line arguments \n");
 
 
 	// -p
@@ -162,6 +193,9 @@ int main (int argc, char ** argv) {
 	// -e
 	FILE * entrada = stdin;
 
+	// -l
+	FILE * log = stderr;
+
 	if(argv != NULL) {
 		int c, a;
 		for(c = 1, a = 1; c < argc; c++) {
@@ -169,7 +203,7 @@ int main (int argc, char ** argv) {
 				continue;
 
 			if(argv[c][0] == '-') {
-				printf("\n   %s: ", argv[c]);
+				printf("\n\t%s: ", argv[c]);
 				switch(argv[c][1] + ((argv[c][1] >= 'a') ? ('A' - 'a') : (0))) {
 					case ARG_DESLOCAMENTO:	
 						printf("offset");
@@ -191,6 +225,11 @@ int main (int argc, char ** argv) {
 						a = COD_QUADROS;//2;
 					break;	
 
+					case ARG_LOG:
+						printf("actions log");
+						a = COD_LOG;
+					break;	
+					
 					case ARG_ENTRADA:
 						printf("command and virtual addresses input");
 						a = COD_ENTRADA;//1;
@@ -206,8 +245,14 @@ int main (int argc, char ** argv) {
 			}
 
 			
+			printf("\t");
 
 			switch(a) {
+				case COD_LOG:
+					printf("Log file: %s", argv[c]);
+					log = fopen(argv[c], "w");
+				break;	
+
 				case COD_ENTRADA://1:
 					printf("Input file: %s", argv[c]);
 					entrada = fopen(argv[c], "r");
@@ -275,25 +320,36 @@ int main (int argc, char ** argv) {
 	}
 
 	MANAGER gerenciador_fisico;
-	int (* substituir_fisico)(MANAGER, int); 
 
 	MANAGER gerenciador_tlb;
-	int (* substituir_tlb)(MANAGER, int);
+	int (* substituir)(MANAGER, int);
+	int (* remover)(MANAGER, int);
+
+	fprintf(log, "\nVirtual Memory Manager simulator: \n");
 
 	switch (algoritmo) {
 		case FIFO:
-			printf("FIFO\n");
+			fprintf(log,"\tFIFO\n");
 
 			gerenciador_tlb = new_fifo(tlb);
 			gerenciador_fisico = new_fifo(quadros);
 
-			substituir_tlb = fifo_access;
-			substituir_fisico = fifo_access;
+			remover = fifo_remove;
+			substituir = fifo_access;
 		break;
 	
 		default:
 		
 	}
 
-	return simulator(entrada, bs, quadros, paginas tlb, deslocamento, gerenciador_fisico, substituir_fisico, gerenciador_tlb, substituir_tlb);
+
+	fprintf(log, "\t TLB: %d page%s\n \n", tlb, (tlb == 1) ? ("") : ("s"));
+	fprintf(log, "\t %d page%s\n", paginas, (paginas == 1) ? ("") : ("s"));
+	fprintf(log, "\t %d frame%s\n", quadros, (quadros == 1) ? ("") : ("s"));
+	
+	fprintf(log, " \n\t Offset: %d bit%s\n\n", deslocamento, (deslocamento == 1) ? ("") : ("s"));
+
+	
+
+	return simulator(log, entrada, bs, quadros, paginas, tlb, deslocamento, gerenciador_fisico, substituir, gerenciador_tlb, substituir, remover);
 }

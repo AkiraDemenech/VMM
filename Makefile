@@ -1,18 +1,23 @@
 simulador:
 	make lru 
 	make fifo
+	make lista
 	make vmm
 	cp a.out simulador.out
 	cp simulador.out simulador 
+	echo Sucesso!
+
+lista:	
+	gcc -g -c list.c
 
 fifo:	
-	gcc -c fifo.c
+	gcc -g -c fifo.c
 
 lru:	
-	gcc -c lru.c
+	gcc -g -c lru.c
 
 vmm:
-	gcc -g vmm.c fifo.o lru.o -o a.out 
+	gcc -g vmm.c list.o fifo.o lru.o -o a.out 
 
 
 clean:

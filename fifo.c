@@ -1,5 +1,6 @@
-#include"fifo.h"#include<stdlib.h>
+#include<stdlib.h>
 #include"fifo.h"
+#include"list.h"
 
 
 typedef struct fifo {
@@ -14,6 +15,28 @@ MANAGER new_fifo (int size_limit) {
 	return fm;
 }
 
+int fifo_remove (MANAGER subst_man, int address) {
+	if(subst_man == NULL)
+		return -3;
+
+	fifo_manager * fm = (fifo_manager*) subst_man;
+
+	LIST node = fm->queue;	
+	LIST prev = NULL;
+
+	while(node != NULL) {
+		
+		if(address == *(int *)list_value(node)) {
+			list_set_next(prev, list_get_next(node));
+		} else prev = node;					
+		
+		node = list_get_next(node);
+	}
+
+	
+	return -1;
+}
+
 int fifo_access (MANAGER subst_man, int address) {
 
 	if(subst_man == NULL)
@@ -23,19 +46,22 @@ int fifo_access (MANAGER subst_man, int address) {
 
 	LIST node = fm->queue;
 	LIST prev = NULL;
+	int i = 0;
 
-	while(list_len(node) > 0) {
+	while(node != NULL) {
 		prev = node;
+		
 
 		if(address == *(int *)list_value(node)) 
 			return -1; // encontrada		
 
 		node = list_get_next(node);
+		i++;
 	}
 
 	int subst = -2; // adicionada sem conflitos
 
-	if(list_len(fm->queue) < fm->limit) 
+	if(i < fm->limit) 
 
 		node = list_node(sizeof(int));								
 
