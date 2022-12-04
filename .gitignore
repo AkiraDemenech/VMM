@@ -3,6 +3,7 @@
 *.txt
 *.bin 
 *.pdf
+*.html
 
 docs/*
 Arquivos_Livro_para_testes/*
