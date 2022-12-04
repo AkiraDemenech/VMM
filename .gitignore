@@ -2,10 +2,14 @@
 *.log 
 *.txt
 *.bin 
+*.sty 
+*.tex 
 *.pdf
 *.html
 
+html/*
 docs/*
+latex/*
 Arquivos_Livro_para_testes/*
 a/*
 
