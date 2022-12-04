@@ -1,7 +1,20 @@
 
+/**
+ * @file vmm.c
+ * @author Guilherme Akira Demenech Mori 
+ * @brief Simulador de gerenciamento de memória virtual 
+ * @details Utiliza política FIFO ou LRU de substituição de página
+ * @version 0
+ * @date 2022-12-04
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 // Virtual Memory Manager (Simulator)
 
 #include<stdio.h>
+
 #include"fifo.h"
 #include"lru.h"
 
@@ -23,29 +36,89 @@
 #define COD_PAG 7
 #define COD_LOG 8
 
-#define DESLOCAMENTO 8 // bits do endereço dentro de cada quadro/página (tamanho em bytes)
+
+/**
+ * @brief Quantidade padrão de bits do endereço dentro de cada quadro/página (tamanho em bytes)
+ * @def DESLOCAMENTO 
+*/
+#define DESLOCAMENTO 8  
 
 
-// quantidade de quadros da memória física simulada
+/**
+ * @brief Quantidade padrão de quadros da memória física simulada
+ * @def QUADROS 
+ */
 #define QUADROS 128 
 
-// quantidade de páginas na tabela 
+/**
+ * @brief Quantidade padrão de páginas na tabela 
+ * @def PAGINAS 
+ */
 #define PAGINAS 256
 
-// quantidade de páginas na TLB
+/**
+ * @brief Quantidade padrão de páginas na TLB
+ * @def TLB
+ */
 #define TLB 16
 
 // algoritmos implementados:
+
+/**
+ * @brief Algoritmo padrão de substituição de página 
+ * @def FIFO
+ */
 #define FIFO 'F' 
+
+/**
+ * @brief Algoritmo alternativo de substituição de páginas
+ * @def LRU
+ */
 #define LRU 'L'
 
+/**
+ * @struct buffer 
+ * @brief Estrutura de cada posição da TLB 
+ *  
+ */
 typedef struct buffer {
 	int page_number;
 	int frame_number;
 } tlb_slot;
+/**
+ * @brief Relaciona as páginas com os quadros correspondentes na TLB
+ * @typedef tlb_slot 
+ */
 
  
 
+ 
+/**
+ * @brief Executa o simulador de acessos a endereços virtuais
+ * @details Exibe os endereços físicos nos quadros associados aos endereços virtuais nas páginas
+ *  
+ * Também exibe o conteúdo da TLB (comando -1), 
+ * as páginas ausentes (comando -2), 
+ * as páginas presentes (comando -3)
+ * e a tabela de páginas (comando -4)
+ * 
+ * @param log arquivo para registro das operações de substituição 
+ * @param accesses arquivo de entrada com os endereços virtuais e comandos 
+ * @param backing_store arquivo de acesso aleatório com os valores das páginas 
+ * 
+ * @param frames tamanho da memória física (quadros)
+ * @param pages tamanho da memória virtual (páginas)
+ * @param tlb_size tamanho da TLB (páginas)
+ * @param offset quantidade de bits do endereço dentro do quadro ou da página 
+ * 
+ * @param physical_manager ponteiro para o gerenciador da memória física 
+ * @param physical_replacement função de substituição de páginas na memória física 
+ * @param tlb_manager ponteiro para o gerenciador da TLB 
+ * @param tlb_replacement função de substituição de páginas na TLB 
+ * @param tlb_removal função de remoção de páginas do gerenciador da TLB 
+ * 
+ * @returns 0 se não ocorrer erro 
+ */
 int simulator (FILE * log, FILE * accesses, FILE * backing_store, 
 				int frames, int pages, int tlb_size, int offset, 
 				MANAGER physical_manager, int(*physical_replacement)(MANAGER,int),
@@ -125,7 +198,7 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 		for(b = 0; b < tlb_size; b++) {
 			if(tlb[b].page_number == t)
 				break;
-			if(tlb[b].page_number < 0)	
+			if(tlb[b].page_number < 0 && r < 0)	
 				r = b;
 		}		
 		if(b >= tlb_size) {		
@@ -200,6 +273,23 @@ int simulator (FILE * log, FILE * accesses, FILE * backing_store,
 	return 0;
 }
 
+
+/**
+ * @brief Função principal do programa 
+ * 
+ * @details Lê os argumentos da linha de comando e chama a função \ref simulator com os valores adequados.
+ * 
+ * Caso não sejam encontrados os argumentos para eles, 
+ * utiliza os valores padrão (definições numéricas de \ref DESLOCAMENTO, \ref TLB, \ref QUADROS e \ref PAGINAS) e
+ * atribui `./BACKING_STORE.bin` para `backing_store`, 
+ * `stdin` para `accesses` e `stderr` para `log`
+ * 
+ * Os argumentos podem ser fornecidos em ordem ou pelas opções `-` 
+ * 
+ * @param argc número de argumentos da linha de comando 
+ * @param argv valores dos argumentos 
+ * @return 0 se não ocorrer nenhum erro  
+ */
 int main (int argc, char ** argv) {
 
 	printf("\nVirtual Memory Manager simulator:\tcommand line arguments \n");
