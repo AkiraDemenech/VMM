@@ -3,9 +3,18 @@
 *.txt
 *.bin 
 *.sty 
+*.idx 
+*.aux 
 *.tex 
-*.pdf
+*.pdf 
+*.png 
+*.svg 
+*.css 
 *.html
+*.js 
+*.md5 
+*.toc 
+*.synctex.gz 
 
 html/*
 docs/*
@@ -13,6 +22,8 @@ latex/*
 Arquivos_Livro_para_testes/*
 a/*
 
+*.txt-exemplo
+*.txt-exemplo_
 simulador
 
 # Prerequisites
