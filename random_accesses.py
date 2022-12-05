@@ -1,3 +1,7 @@
+'''
+	Gerador de casos de testes 
+'''
+
 SMALL_JUMP_SIZE = 16
 SMALL_JUMP_PROBABILITY = 0.4
 RANDOM_JUMP_PROBABILITY = 0.3

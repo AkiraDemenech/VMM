@@ -37,5 +37,5 @@ doclean:
 	rm -f -r html/* latex/*	
 
 doc:	
-	doxygen docsimulador
+	doxygen doconfig 
 	echo Documentado com sucesso!
