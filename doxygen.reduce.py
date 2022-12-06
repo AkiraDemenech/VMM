@@ -14,7 +14,7 @@ with open('doconfig', 'r', encoding='utf-8') as dox:
 			continue 
 		dados.append([col.strip() for col in ln.split('=') if not col.isspace()])	
 		
-with open('doxygen_config.txt', 'w', encoding='utf-8') as docs:
+with open('doxygen_config', 'w', encoding='utf-8') as docs:
 	print('#--------------------------------------------------------------------------- \n# Project related configuration options \n#--------------------------------------------------------------------------- \n', file=docs)
 	
 	comprimento = 4
